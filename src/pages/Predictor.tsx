@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
@@ -8,9 +7,8 @@ import { Label } from "@/components/ui/label";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { BarChart2, Droplets, LineChart, AlertCircle } from "lucide-react";
 import { PredictionInput, PredictionResult, predictFertility } from "@/utils/modelUtils";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
-// Helper to create range labels
 const createLabels = (
   min: number,
   max: number,
@@ -23,7 +21,6 @@ const createLabels = (
   }));
 };
 
-// Mock fertilizer recommendations based on fertility class
 const fertilizerRecommendations = {
   Low: [
     "Increase nitrogen application by 30-40% of standard recommendation",
@@ -46,7 +43,6 @@ const fertilizerRecommendations = {
 };
 
 const Predictor = () => {
-  // State for input values
   const [input, setInput] = useState<PredictionInput>({
     n: 180,
     p: 15,
@@ -55,22 +51,18 @@ const Predictor = () => {
     rainfall: 1000,
   });
 
-  // State for prediction results
   const [prediction, setPrediction] = useState<PredictionResult | null>(null);
   
-  // State for page load animation
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     setIsLoaded(true);
   }, []);
 
-  // Handle input changes from sliders
   const handleSliderChange = (name: keyof PredictionInput, value: number[]) => {
     setInput((prev) => ({ ...prev, [name]: value[0] }));
   };
 
-  // Handle input changes from text fields
   const handleInputChange = (name: keyof PredictionInput, value: string) => {
     const numValue = parseFloat(value);
     if (!isNaN(numValue)) {
@@ -78,14 +70,11 @@ const Predictor = () => {
     }
   };
 
-  // Submit prediction
   const handleSubmit = () => {
     try {
-      // Get prediction from the model
       const result = predictFertility(input);
       setPrediction(result);
       
-      // Show success toast
       toast.success("Prediction generated successfully", {
         description: `Fertility class: ${result.fertilityClass} with ${result.confidence.toFixed(1)}% confidence`,
       });
@@ -96,7 +85,6 @@ const Predictor = () => {
     }
   };
 
-  // Reset to default values
   const handleReset = () => {
     setInput({
       n: 180,
@@ -109,7 +97,6 @@ const Predictor = () => {
     toast.info("Input values reset to defaults");
   };
 
-  // Get color based on fertility class
   const getFertilityColor = (className: string) => {
     switch (className) {
       case "Low":
@@ -123,7 +110,6 @@ const Predictor = () => {
     }
   };
 
-  // Get background color based on fertility class
   const getFertilityBgColor = (className: string) => {
     switch (className) {
       case "Low":
@@ -150,7 +136,6 @@ const Predictor = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Input Panel */}
           <div className={`lg:col-span-2 transition-all duration-1000 delay-100 ${isLoaded ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}>
             <Card>
               <CardHeader>
@@ -163,7 +148,6 @@ const Predictor = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Nitrogen (N) */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="n-input" className="text-base">
@@ -193,7 +177,6 @@ const Predictor = () => {
                   </div>
                 </div>
 
-                {/* Phosphorus (P) */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="p-input" className="text-base">
@@ -223,7 +206,6 @@ const Predictor = () => {
                   </div>
                 </div>
 
-                {/* Potassium (K) */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="k-input" className="text-base">
@@ -253,7 +235,6 @@ const Predictor = () => {
                   </div>
                 </div>
 
-                {/* NDVI */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="ndvi-input" className="text-base">
@@ -283,7 +264,6 @@ const Predictor = () => {
                   </div>
                 </div>
 
-                {/* Annual Rainfall */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="rainfall-input" className="text-base">
@@ -325,9 +305,7 @@ const Predictor = () => {
             </Card>
           </div>
 
-          {/* Results Panel */}
           <div className={`space-y-6 transition-all duration-1000 delay-200 ${isLoaded ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}>
-            {/* Prediction Result */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -390,7 +368,6 @@ const Predictor = () => {
               </CardContent>
             </Card>
 
-            {/* Interpretation Guide */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center text-base">
