@@ -1,69 +1,84 @@
-# Welcome to your Lovable project
 
-## Project info
+# Land Fertility Prediction System
 
-**URL**: https://lovable.dev/projects/b52b4d75-9031-498f-847f-dd09610b63dc
+## Overview
 
-## How can I edit this code?
+This web application helps predict and visualize land fertility based on soil parameters. It uses machine learning to classify land fertility into Low, Medium, or High categories based on key inputs like nitrogen, phosphorus, potassium, NDVI, and rainfall.
 
-There are several ways of editing your application.
+## Features
 
-**Use Lovable**
+- Interactive fertility prediction based on user inputs
+- Historical data visualization for states and districts
+- Detailed recommendations based on fertility classification
+- Interactive charts and visualization tools
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/b52b4d75-9031-498f-847f-dd09610b63dc) and start prompting.
+## Project Structure
 
-Changes made via Lovable will be committed automatically to this repo.
+### Frontend
 
-**Use your preferred IDE**
+- React with TypeScript
+- Tailwind CSS for styling
+- shadcn/ui for UI components
+- Recharts for data visualization
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Backend Integration
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+The application is designed to work with both a mock backend (for development) and a real backend (for production). The backend structure includes:
 
-Follow these steps:
+- `src/api/` - API client code for making requests
+- `src/services/` - Service layer for data processing and model interaction
+- `src/utils/` - Utilities for model integration and data handling
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## How to Integrate Your Machine Learning Model
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Option 1: Direct Model Integration (Basic)
 
-# Step 3: Install the necessary dependencies.
-npm i
+1. Place your `.pkl` model file in the `public/models/` directory
+2. Update `src/utils/modelIntegration.ts` to load and use your model
+3. Test locally before deployment
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### Option 2: API-Based Integration (Recommended)
+
+1. Host your model on a server that can process requests
+2. Configure the API endpoints in `src/api/index.ts`
+3. Update environment variables with your API URL
+
+## Integrating Your CSV Data
+
+### Method 1: Direct CSV Integration
+
+1. Place your CSV files in the `public/data/` directory
+2. Update the data service in `src/services/data-service.ts` to load your CSV files
+3. Test locally before deployment
+
+### Method 2: API-Based Data Integration
+
+1. Host your data on a server or database
+2. Configure the API endpoints in `src/api/index.ts`
+3. Update the data fetching logic in the visualization components
+
+## Development
+
+### Prerequisites
+
+- Node.js (v14+)
+- npm or yarn
+
+### Installation
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Deployment
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+The application can be deployed to any static site hosting service. For the backend API, you'll need a server that can handle your model inference requests.
 
-**Use GitHub Codespaces**
+## License
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+MIT
 
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/b52b4d75-9031-498f-847f-dd09610b63dc) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)

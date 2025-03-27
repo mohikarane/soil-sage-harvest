@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -211,7 +210,7 @@ const Visualization = () => {
                       name="Fertility Class"
                       stroke="#3c9144"
                       strokeWidth={2}
-                      dot={{ r: 4, strokeWidth: 0, fill: ({ color }) => color }}
+                      dot={{ r: 4, strokeWidth: 0, fill: "#3c9144" }}
                       activeDot={{ r: 6, strokeWidth: 0 }}
                     />
                   </ReLineChart>

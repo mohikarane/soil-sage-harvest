@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
@@ -148,6 +149,7 @@ const Predictor = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* N Slider */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="n-input" className="text-base">
@@ -177,6 +179,7 @@ const Predictor = () => {
                   </div>
                 </div>
 
+                {/* P Slider */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="p-input" className="text-base">
@@ -206,6 +209,7 @@ const Predictor = () => {
                   </div>
                 </div>
 
+                {/* K Slider */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="k-input" className="text-base">
@@ -235,6 +239,7 @@ const Predictor = () => {
                   </div>
                 </div>
 
+                {/* NDVI Slider */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="ndvi-input" className="text-base">
@@ -264,6 +269,7 @@ const Predictor = () => {
                   </div>
                 </div>
 
+                {/* Rainfall Slider */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="rainfall-input" className="text-base">
@@ -319,8 +325,8 @@ const Predictor = () => {
               <CardContent>
                 {prediction ? (
                   <div className="space-y-6">
-                    <div className="text-center p-6 rounded-lg border-2 shadow-sm animate-scale-in" 
-                      className={getFertilityBgColor(prediction.fertilityClass)}>
+                    <div 
+                      className={`text-center p-6 rounded-lg border-2 shadow-sm animate-scale-in ${getFertilityBgColor(prediction.fertilityClass)}`}>
                       <h3 className="text-2xl font-bold mb-2">
                         <span className={getFertilityColor(prediction.fertilityClass)}>
                           {prediction.fertilityClass}
