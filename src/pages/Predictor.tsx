@@ -1,415 +1,176 @@
-
-import { useState, useEffect } from "react";
-import { Slider } from "@/components/ui/slider";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import SectionHeading from "@/components/ui/SectionHeading";
-import { BarChart2, Droplets, LineChart, AlertCircle } from "lucide-react";
-import { PredictionInput, PredictionResult, predictFertility } from "@/utils/modelUtils";
-import { toast } from "sonner";
-
-const createLabels = (
-  min: number,
-  max: number,
-  count: number
-): { value: number; label: string }[] => {
-  const step = (max - min) / (count - 1);
-  return Array.from({ length: count }, (_, i) => ({
-    value: min + step * i,
-    label: (min + step * i).toString(),
-  }));
-};
-
-const fertilizerRecommendations = {
-  Low: [
-    "Increase nitrogen application by 30-40% of standard recommendation",
-    "Apply phosphorus-rich fertilizers like DAP",
-    "Consider using slow-release fertilizers for better nutrient uptake",
-    "Incorporate organic matter to improve soil structure",
-  ],
-  Medium: [
-    "Apply balanced NPK fertilizer at standard rates",
-    "Consider split application of nitrogen fertilizers",
-    "Integrate organic compost with chemical fertilizers",
-    "Monitor soil moisture levels for optimal nutrient absorption",
-  ],
-  High: [
-    "Reduce fertilizer application by 10-20% from standard recommendation",
-    "Focus on maintaining rather than increasing fertility levels",
-    "Use precision agriculture techniques to apply fertilizers only where needed",
-    "Implement crop rotation to prevent nutrient depletion",
-  ],
-};
 
 const Predictor = () => {
-  const [input, setInput] = useState<PredictionInput>({
-    n: 180,
-    p: 15,
-    k: 200,
-    ndvi: 0.5,
-    rainfall: 1000,
+  const [formData, setFormData] = useState({
+    n: "",
+    p: "",
+    k: "",
+    ndvi: "",
+    rainfall: "",
   });
 
-  const [prediction, setPrediction] = useState<PredictionResult | null>(null);
-  
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [prediction, setPrediction] = useState<string | null>(null);
+  const [geminiResponse, setGeminiResponse] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    setIsLoaded(true);
-  }, []);
-
-  const handleSliderChange = (name: keyof PredictionInput, value: number[]) => {
-    setInput((prev) => ({ ...prev, [name]: value[0] }));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleInputChange = (name: keyof PredictionInput, value: string) => {
-    const numValue = parseFloat(value);
-    if (!isNaN(numValue)) {
-      setInput((prev) => ({ ...prev, [name]: numValue }));
-    }
-  };
-
-  const handleSubmit = () => {
-    try {
-      const result = predictFertility(input);
-      setPrediction(result);
-      
-      toast.success("Prediction generated successfully", {
-        description: `Fertility class: ${result.fertilityClass} with ${result.confidence.toFixed(1)}% confidence`,
-      });
-    } catch (error) {
-      toast.error("Error generating prediction", {
-        description: "Please try again with different input values.",
-      });
-    }
-  };
-
-  const handleReset = () => {
-    setInput({
-      n: 180,
-      p: 15,
-      k: 200,
-      ndvi: 0.5,
-      rainfall: 1000,
-    });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setPrediction(null);
-    toast.info("Input values reset to defaults");
-  };
+    setGeminiResponse(null);
+    setError(null);
 
-  const getFertilityColor = (className: string) => {
-    switch (className) {
-      case "Low":
-        return "text-amber-500";
-      case "Medium":
-        return "text-blue-500";
-      case "High":
-        return "text-green-500";
-      default:
-        return "text-gray-500";
-    }
-  };
+    console.log("Submitting Data:", formData);
 
-  const getFertilityBgColor = (className: string) => {
-    switch (className) {
-      case "Low":
-        return "bg-amber-50 border-amber-200";
-      case "Medium":
-        return "bg-blue-50 border-blue-200";
-      case "High":
-        return "bg-green-50 border-green-200";
-      default:
-        return "bg-gray-50 border-gray-200";
+    try {
+      // Step 1: Fetch Prediction from Flask Backend
+      const predictionResponse = await fetch("http://127.0.0.1:5000/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          n: Number(formData.n),
+          p: Number(formData.p),
+          k: Number(formData.k),
+          ndvi: Number(formData.ndvi),
+          rainfall: Number(formData.rainfall),
+        }),
+      });
+
+      if (!predictionResponse.ok) throw new Error("Failed to fetch prediction");
+
+      const predictionData = await predictionResponse.json();
+      setPrediction(predictionData.prediction);
+
+      // Step 2: Fetch Gemini AI Response
+      const geminiResponse = await fetch("http://127.0.0.1:5000/gemini", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          n: Number(formData.n),
+          p: Number(formData.p),
+          k: Number(formData.k),
+          ndvi: Number(formData.ndvi),
+          rainfall: Number(formData.rainfall),
+        }),
+      });
+
+      if (!geminiResponse.ok) throw new Error("Failed to fetch Gemini response");
+
+      const geminiData = await geminiResponse.json();
+      setGeminiResponse(geminiData.gemini_response);
+    } catch (err: any) {
+      console.error("Error:", err);
+      setError(err.message || "Error fetching prediction");
     }
   };
 
   return (
-    <div className="min-h-screen py-12">
-      <div className="container mx-auto px-4 md:px-6">
-        <div className={`transition-all duration-1000 ${isLoaded ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}>
-          <SectionHeading
-            pretitle="Soil Analysis"
-            title="Land Fertility Prediction"
-            description="Input soil parameters to predict fertility class and get recommendations"
-            className="mb-12"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className={`lg:col-span-2 transition-all duration-1000 delay-100 ${isLoaded ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <BarChart2 className="mr-2 h-5 w-5 text-primary" />
-                  Soil Parameters Input
-                </CardTitle>
-                <CardDescription>
-                  Adjust the sliders or enter values directly to configure soil parameters
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* N Slider */}
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="n-input" className="text-base">
-                      Nitrogen (N) - kg/ha
-                    </Label>
-                    <Input
-                      id="n-input"
-                      type="number"
-                      className="w-20 text-center"
-                      value={input.n}
-                      onChange={(e) => handleInputChange("n", e.target.value)}
-                    />
-                  </div>
-                  <Slider
-                    id="n-slider"
-                    min={0}
-                    max={400}
-                    step={1}
-                    value={[input.n]}
-                    onValueChange={(value) => handleSliderChange("n", value)}
-                    className="py-2"
-                  />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Low (0)</span>
-                    <span>Medium (200)</span>
-                    <span>High (400)</span>
-                  </div>
-                </div>
-
-                {/* P Slider */}
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="p-input" className="text-base">
-                      Phosphorus (P) - kg/ha
-                    </Label>
-                    <Input
-                      id="p-input"
-                      type="number"
-                      className="w-20 text-center"
-                      value={input.p}
-                      onChange={(e) => handleInputChange("p", e.target.value)}
-                    />
-                  </div>
-                  <Slider
-                    id="p-slider"
-                    min={0}
-                    max={30}
-                    step={0.1}
-                    value={[input.p]}
-                    onValueChange={(value) => handleSliderChange("p", value)}
-                    className="py-2"
-                  />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Low (0)</span>
-                    <span>Medium (15)</span>
-                    <span>High (30)</span>
-                  </div>
-                </div>
-
-                {/* K Slider */}
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="k-input" className="text-base">
-                      Potassium (K) - kg/ha
-                    </Label>
-                    <Input
-                      id="k-input"
-                      type="number"
-                      className="w-20 text-center"
-                      value={input.k}
-                      onChange={(e) => handleInputChange("k", e.target.value)}
-                    />
-                  </div>
-                  <Slider
-                    id="k-slider"
-                    min={0}
-                    max={400}
-                    step={1}
-                    value={[input.k]}
-                    onValueChange={(value) => handleSliderChange("k", value)}
-                    className="py-2"
-                  />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Low (0)</span>
-                    <span>Medium (200)</span>
-                    <span>High (400)</span>
-                  </div>
-                </div>
-
-                {/* NDVI Slider */}
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="ndvi-input" className="text-base">
-                      NDVI (Vegetation Index)
-                    </Label>
-                    <Input
-                      id="ndvi-input"
-                      type="number"
-                      className="w-20 text-center"
-                      value={input.ndvi}
-                      onChange={(e) => handleInputChange("ndvi", e.target.value)}
-                    />
-                  </div>
-                  <Slider
-                    id="ndvi-slider"
-                    min={0}
-                    max={1}
-                    step={0.01}
-                    value={[input.ndvi]}
-                    onValueChange={(value) => handleSliderChange("ndvi", value)}
-                    className="py-2"
-                  />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Poor (0)</span>
-                    <span>Moderate (0.5)</span>
-                    <span>Excellent (1)</span>
-                  </div>
-                </div>
-
-                {/* Rainfall Slider */}
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="rainfall-input" className="text-base">
-                      Annual Rainfall (mm)
-                    </Label>
-                    <Input
-                      id="rainfall-input"
-                      type="number"
-                      className="w-20 text-center"
-                      value={input.rainfall}
-                      onChange={(e) => handleInputChange("rainfall", e.target.value)}
-                    />
-                  </div>
-                  <Slider
-                    id="rainfall-slider"
-                    min={0}
-                    max={2000}
-                    step={10}
-                    value={[input.rainfall]}
-                    onValueChange={(value) => handleSliderChange("rainfall", value)}
-                    className="py-2"
-                  />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Arid (0)</span>
-                    <span>Moderate (1000)</span>
-                    <span>Heavy (2000)</span>
-                  </div>
-                </div>
-
-                <div className="flex gap-4 pt-4">
-                  <Button onClick={handleSubmit} className="flex-1">
-                    Generate Prediction
-                  </Button>
-                  <Button variant="outline" onClick={handleReset}>
-                    Reset
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+    <div className="flex flex-col items-center justify-center ">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl">
+        <h2 className="text-xl font-bold mb-4 text-center">Predict Land Fertility</h2>
+        
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div>
+            <label className="block text-sm font-medium">Nitrogen (N) Level</label>
+            <Input type="number" name="n" value={formData.n} onChange={handleChange} required />
           </div>
 
-          <div className={`space-y-6 transition-all duration-1000 delay-200 ${isLoaded ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <LineChart className="mr-2 h-5 w-5 text-primary" />
-                  Prediction Results
-                </CardTitle>
-                <CardDescription>
-                  Fertility class prediction based on input parameters
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {prediction ? (
-                  <div className="space-y-6">
-                    <div 
-                      className={`text-center p-6 rounded-lg border-2 shadow-sm animate-scale-in ${getFertilityBgColor(prediction.fertilityClass)}`}>
-                      <h3 className="text-2xl font-bold mb-2">
-                        <span className={getFertilityColor(prediction.fertilityClass)}>
-                          {prediction.fertilityClass}
-                        </span> Fertility
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        Prediction confidence: {prediction.confidence.toFixed(1)}%
-                      </p>
-                    </div>
+          <div>
+            <label className="block text-sm font-medium">Phosphorus (P) Level</label>
+            <Input type="number" name="p" value={formData.p} onChange={handleChange} required />
+          </div>
 
-                    {prediction.similarRegion && (
-                      <div>
-                        <h4 className="font-medium mb-2">Similar Region</h4>
-                        <p className="text-sm">
-                          Your soil parameters are similar to those found in{" "}
-                          <span className="font-semibold">{prediction.similarRegion.name}</span> 
-                          {" "}({Math.round(prediction.similarRegion.similarity)}% similarity)
-                        </p>
-                      </div>
-                    )}
-                    
-                    <div>
-                      <h4 className="font-medium mb-2">Fertilizer Recommendations</h4>
-                      <ul className="text-sm space-y-2">
-                        {fertilizerRecommendations[prediction.fertilityClass as keyof typeof fertilizerRecommendations].map((rec, index) => (
-                          <li key={index} className="flex items-start gap-2">
-                            <div className="mt-1 min-w-4">
-                              <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
-                            </div>
-                            {rec}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="h-64 flex flex-col items-center justify-center text-center p-4 border border-dashed rounded-lg">
-                    <Droplets className="h-12 w-12 text-muted-foreground/40 mb-4" />
-                    <h3 className="text-lg font-medium mb-2">No Prediction Yet</h3>
-                    <p className="text-muted-foreground text-sm">
-                      Adjust the parameters and click "Generate Prediction" to see results
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+          <div>
+            <label className="block text-sm font-medium">Potassium (K) Level</label>
+            <Input type="number" name="k" value={formData.k} onChange={handleChange} required />
+          </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center text-base">
-                  <AlertCircle className="mr-2 h-4 w-4 text-primary" />
-                  Interpretation Guide
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm space-y-3">
-                  <div>
-                    <h4 className="font-semibold mb-1">Nitrogen (N)</h4>
-                    <p className="text-muted-foreground">
-                      Essential for leaf growth and protein formation. Values below 140 kg/ha are low, 140-280 kg/ha are moderate, above 280 kg/ha are high.
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-1">Phosphorus (P)</h4>
-                    <p className="text-muted-foreground">
-                      Critical for root development and energy transfer. Values below 10 kg/ha are low, 10-25 kg/ha are moderate, above 25 kg/ha are high.
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-1">Potassium (K)</h4>
-                    <p className="text-muted-foreground">
-                      Important for overall plant health and drought resistance. Values below 140 kg/ha are low, 140-280 kg/ha are moderate, above 280 kg/ha are high.
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-1">NDVI</h4>
-                    <p className="text-muted-foreground">
-                      Measures vegetation density and health. Values below 0.4 indicate poor vegetation, 0.4-0.6 moderate, above 0.6 indicate healthy vegetation.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <div>
+            <label className="block text-sm font-medium">NDVI (0-1)</label>
+            <Input type="number" name="ndvi" value={formData.ndvi} onChange={handleChange} required min="0" max="1" step="0.01" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium">Annual Rainfall (mm)</label>
+            <Input type="number" name="rainfall" value={formData.rainfall} onChange={handleChange} required />
+          </div>
+
+          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">Predict Fertility</Button>
+        </form>
+
+        {prediction && (
+          <div className="mt-4 p-3 text-center bg-green-100 text-green-700 rounded">
+            <strong>Predicted Fertility Class:</strong> {prediction}
+          </div>
+        )}
+        {geminiResponse && (
+          <div className="mt-6 p-4 bg-gray-100 rounded-lg shadow-md">
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">💡 Insights</h3>
+            <div className="prose space-y-2 text-sm leading-relaxed">
+              {geminiResponse.split("\n").map((line, index) => (
+                <p key={index} className="ml-4">{line.startsWith("**") ? <strong>{line.replace(/\*\*/g, "")}</strong> : line}</p>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="mt-4 p-3 text-center bg-red-100 text-red-700 rounded">
+            <strong>Error:</strong> {error}
+          </div>
+        )}
+
+
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold text-center">Threshold Values</h3>
+          <div className="mt-2 bg-gray-100 p-4 rounded-lg text-sm">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b">
+                  <th className="p-2">Factors</th>
+                  <th className="p-2">Low</th>
+                  <th className="p-2">Medium</th>
+                  <th className="p-2">High</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b">
+                  <td className="p-2">Nitrogen (N)</td>
+                  <td className="p-2">&lt; 240</td>
+                  <td className="p-2">240 - 480</td>
+                  <td className="p-2">&gt; 480</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="p-2">Phosphorus (P)</td>
+                  <td className="p-2">&lt; 11</td>
+                  <td className="p-2">11 - 22</td>
+                  <td className="p-2">&gt; 22</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="p-2">Potassium (K)</td>
+                  <td className="p-2">&lt; 110</td>
+                  <td className="p-2">110 - 280</td>
+                  <td className="p-2">&gt; 280</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="p-2">Mean NDVI</td>
+                  <td className="p-2">&lt; 0.4</td>
+                  <td className="p-2">0.4 - 0.6</td>
+                  <td className="p-2">&gt; 0.6</td>
+                </tr>
+                <tr>
+                  <td className="p-2">Annual Rainfall</td>
+                  <td className="p-2">&lt; 400</td>
+                  <td className="p-2">400 - 1600</td>
+                  <td className="p-2">&gt; 1600</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

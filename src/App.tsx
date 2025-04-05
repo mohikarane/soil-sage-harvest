@@ -13,6 +13,8 @@ const Home = lazy(() => import("./pages/Index"));
 const Predictor = lazy(() => import("./pages/Predictor"));
 const Visualization = lazy(() => import("./pages/Visualization"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const MapPage = lazy(() => import("./pages/Map"));
+
 
 // Loading fallback
 const PageLoader = () => (
@@ -37,6 +39,7 @@ const App = () => (
                 <Route path="/" element={<Home />} />
                 <Route path="/predictor" element={<Predictor />} />
                 <Route path="/visualization" element={<Visualization />} />
+                <Route path="/map" element={<MapPage />} />  {/* Add this line */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

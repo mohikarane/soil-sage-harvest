@@ -25,6 +25,7 @@ const Navbar = () => {
     { name: "Home", path: "/" },
     { name: "Predictor", path: "/predictor" },
     { name: "Visualization", path: "/visualization" },
+    { name: "Map", path: "/map" },  // Added Map page
   ];
 
   return (
@@ -60,7 +61,12 @@ const Navbar = () => {
           </nav>
           
           {/* Mobile menu button - can be expanded later */}
-          <button className="flex md:hidden p-2 rounded-md hover:bg-secondary">
+          {/* Mobile menu button - Fixed accessibility issues */}
+          <button 
+            type="button" 
+            aria-label="Open navigation menu" 
+            className="flex md:hidden p-2 rounded-md hover:bg-secondary"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"

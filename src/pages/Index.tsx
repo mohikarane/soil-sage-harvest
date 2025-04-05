@@ -222,8 +222,8 @@ const Index = () => {
                 <span className="text-2xl font-semibold text-primary">MR</span>
               </div>
               <h3 className="text-xl font-semibold mb-1">Mohika Rane</h3>
-              <p className="text-sm text-muted-foreground mb-3">Team Leader</p>
-              <p className="text-sm">Specializes in machine learning models for agricultural applications</p>
+              <p className="text-sm text-muted-foreground mb-3">Team Leader: Member 1</p>
+              <p className="text-sm">Third Year Computer Engineering Student at Fr. CRCE, Bandra</p>
             </div>
             
             <div className="glass rounded-xl p-6 text-center hover-lift">
@@ -231,8 +231,8 @@ const Index = () => {
                 <span className="text-2xl font-semibold text-primary">VR</span>
               </div>
               <h3 className="text-xl font-semibold mb-1">Vinisha Rajpurkar</h3>
-              <p className="text-sm text-muted-foreground mb-3">Data Scientist</p>
-              <p className="text-sm">Expert in geospatial data analysis and visualization</p>
+              <p className="text-sm text-muted-foreground mb-3">Member 2 </p>
+              <p className="text-sm">Third Year Computer Engineering Student at Fr. CRCE, Bandra</p>
             </div>
             
             <div className="glass rounded-xl p-6 text-center hover-lift">
@@ -240,8 +240,8 @@ const Index = () => {
                 <span className="text-2xl font-semibold text-primary">RB</span>
               </div>
               <h3 className="text-xl font-semibold mb-1">Rohan Benoy</h3>
-              <p className="text-sm text-muted-foreground mb-3">Software Engineer</p>
-              <p className="text-sm">Specialized in building scalable web applications for environmental monitoring</p>
+              <p className="text-sm text-muted-foreground mb-3">Member 3</p>
+              <p className="text-sm">Third Year Computer Engineering Student at Fr. CRCE, Bandra</p>
             </div>
             
             <div className="glass rounded-xl p-6 text-center hover-lift">
@@ -249,8 +249,8 @@ const Index = () => {
                 <span className="text-2xl font-semibold text-primary">PD</span>
               </div>
               <h3 className="text-xl font-semibold mb-1">Precious Dmello</h3>
-              <p className="text-sm text-muted-foreground mb-3">Agricultural Scientist</p>
-              <p className="text-sm">Provides domain expertise on soil science and fertility factors</p>
+              <p className="text-sm text-muted-foreground mb-3">Member 4</p>
+              <p className="text-sm">Third Year Computer Engineering Student at Fr. CRCE, Bandra</p>
             </div>
           </div>
         </div>
